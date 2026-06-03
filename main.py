@@ -23,6 +23,10 @@ preto = (0, 0, 0)
 
 menu = pygame.image.load("bases/menu.jpg")
 menu = pygame.transform.scale(menu, (1000,700))
+fundo = pygame.image.load("bases/fundo.jpg")
+fundo = pygame.transform.scale(fundo, (1000,700))
+pascal = pygame.image.load("bases/pascal.png")
+pascal = pygame.transform.scale(pascal, (105,75))
 
 def tela_inicio():
     maiorNome, maiorPontos, dataJogada, horaJogada = maior_pontuador()
@@ -72,7 +76,53 @@ def tela_inicio():
         pygame.display.update()
         relogio.tick(60)
 
+
+def jogo():
+    fundoX1 = 0
+    fundoX2 = 1000
+    velocidadeFundo = 3
+    posicaoXPascal = 135
+    linhas = [232,308,390,470,557]
+    linhaAtual = 2
+    posicaoYPascal = linhas[linhaAtual]
+
+
+    while True:
+        for evento in pygame.event.get():
+            if evento.type == pygame.QUIT:
+                pygame.quit()
+                quit()
+            if evento.type == pygame.KEYDOWN:
+                if evento.key == pygame.K_ESCAPE:
+                    pygame.quit()
+                    quit()                   
+                if evento.key == pygame.K_UP:
+                    if linhaAtual > 0:
+                        linhaAtual -= 1
+                if evento.key == pygame.K_DOWN:
+                    if linhaAtual < 4:
+                        linhaAtual += 1
+
+
+        posicaoYPascal = linhas[linhaAtual]
+
+        fundoX1 -= velocidadeFundo
+        fundoX2 -= velocidadeFundo
+        if fundoX1 <= -1000:
+            fundoX1 = 1000
+        if fundoX2 <= -1000:
+            fundoX2 = 1000
+        tela.blit(fundo, (fundoX1,0))
+        tela.blit(fundo, (fundoX2,0))
+
+        tela.blit(pascal, (posicaoXPascal, posicaoYPascal))
+
+        pygame.display.update()
+        relogio.tick(60)
+
+
 tela_inicio()    
+jogo()
 
 executando = True
 while executando:
