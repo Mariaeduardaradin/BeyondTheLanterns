@@ -1,4 +1,5 @@
 import pygame
+import random
 from recursos.funcoes import limpar_tela, inicializar_log, salvar_log, maior_pontuador
 
 limpar_tela()
@@ -27,6 +28,10 @@ fundo = pygame.image.load("bases/fundo.jpg")
 fundo = pygame.transform.scale(fundo, (1000,700))
 pascal = pygame.image.load("bases/pascal.png")
 pascal = pygame.transform.scale(pascal, (105,75))
+lanterna = pygame.image.load("bases/lanterna.png")
+lanterna = pygame.transform.scale(lanterna, (42,60))
+flor = pygame.image.load("bases/flor.png")
+flor = pygame.transform.scale(flor, (40,60))
 
 def tela_inicio():
     maiorNome, maiorPontos, dataJogada, horaJogada = maior_pontuador()
@@ -85,6 +90,10 @@ def jogo():
     linhas = [232,308,390,470,557]
     linhaAtual = 2
     posicaoYPascal = linhas[linhaAtual]
+    pontos = 0
+    fonteHUD = pygame.font.Font("bases/EBGaramond.ttf", 30)
+    posicaoXLanterna = 1200
+    posicaoYLanterna = random.choice(linhas)
 
 
     while True:
@@ -105,17 +114,37 @@ def jogo():
 
 
         posicaoYPascal = linhas[linhaAtual]
+        retanguloPascal = pygame.Rect(posicaoXPascal, posicaoYPascal, 105,75)
+        retanguloLanterna = pygame.Rect(posicaoXLanterna, posicaoYLanterna, 42,60)
+
+        if retanguloPascal.colliderect(retanguloLanterna):
+            pontos += 1
+            posicaoXLanterna = random.randint(1200,1800)
+            posicaoYLanterna = random.choice(linhas)
+        if pontos >= 10:
+            velocidadeFundo = 4
+        if pontos >= 20:
+            velocidadeFundo = 5
+        if pontos >= 30:
+            velocidadeFundo = 6
 
         fundoX1 -= velocidadeFundo
         fundoX2 -= velocidadeFundo
+        posicaoXLanterna -= velocidadeFundo
         if fundoX1 <= -1000:
             fundoX1 = 1000
         if fundoX2 <= -1000:
             fundoX2 = 1000
+        if posicaoXLanterna < -100:
+            posicaoXLanterna = random.randint(1200,1800)
+            posicaoYLanterna = random.choice(linhas)
+
         tela.blit(fundo, (fundoX1,0))
         tela.blit(fundo, (fundoX2,0))
-
+        tela.blit(lanterna, (posicaoXLanterna, posicaoYLanterna))
         tela.blit(pascal, (posicaoXPascal, posicaoYPascal))
+        textoPontos = fonteHUD.render(f"Pontos: {pontos}", True, branco)
+        tela.blit(textoPontos, (20,20))
 
         pygame.display.update()
         relogio.tick(60)
@@ -123,17 +152,3 @@ def jogo():
 
 tela_inicio()    
 jogo()
-
-executando = True
-while executando:
-    for evento in pygame.event.get():
-        if evento.type == pygame.QUIT:
-            executando = False
-        if evento.type == pygame.KEYDOWN:
-            if evento.key == pygame.K_ESCAPE:
-                executando = False
-    
-    tela.fill(branco)
-    pygame.display.update()
-    relogio.tick(60)
-pygame.quit()
