@@ -1,10 +1,14 @@
 import pygame
 import random
+import pyttsx3
+
 from recursos.funcoes import limpar_tela, inicializar_log, salvar_log, maior_pontuador
+from recursos.trabalho import sol_pulsante
 
 limpar_tela()
 inicializar_log()
 pygame.init()
+narrador = pyttsx3.init()
 
 while True:
     nome = input("Identifique-se, cidadão de Corona: ")
@@ -34,6 +38,7 @@ lanterna = pygame.image.load("bases/lanterna.png")
 lanterna = pygame.transform.scale(lanterna, (42,60))
 flor = pygame.image.load("bases/flor.png")
 flor = pygame.transform.scale(flor, (46,70))
+borboleta = pygame.image.load("bases/borboleta.png")
 coracao = pygame.image.load("bases/vidas.png")
 coracao = pygame.transform.scale(coracao, (55,55))
 pedra1 = pygame.image.load("bases/pedra1.png")
@@ -57,6 +62,8 @@ def tela_inicio():
                     quit()
             if evento.type == pygame.MOUSEBUTTONDOWN:
                     if botaoIniciar.collidepoint(evento.pos):
+                        narrador.say("Uma nova aventura começa...")
+                        narrador.runAndWait()
                         return
 
         tela.blit(menu, (0,0))
@@ -121,6 +128,8 @@ def jogo():
     fundoX1 = 0
     fundoX2 = 1000
     velocidadeFundo = 3
+    raioSol = 20
+    crescendoSol = True
     posicaoXPascal = 135
     linhas = [232,308,390,470,557]
     linhaAtual = 2
@@ -128,12 +137,16 @@ def jogo():
     pontos = 0
     vidas = 3
     tempoInvulneravel = 0
+    posicaoXBorboleta = 120
+    posicaoYBorboleta = 15
+    contadorBorboleta = 0
+    pausado = False
     fonteHUD = pygame.font.Font("bases/EBGaramond.ttf", 25)
+
     posicaoXLanterna = 1200
     posicaoYLanterna = random.choice(linhas)
     posicaoXFlor = random.randint(8000,15000)
     posicaoYFlor = random.choice(linhas)
-
     posicaoXObstaculo1 = random.randint(1000,1200)
     posicaoYObstaculo1 = random.choice(linhas)
     posicaoXObstaculo2 = random.randint(1200,1400)
@@ -152,7 +165,9 @@ def jogo():
             if evento.type == pygame.KEYDOWN:
                 if evento.key == pygame.K_ESCAPE:
                     pygame.quit()
-                    quit()                   
+                    quit()
+                if evento.key == pygame.K_SPACE:
+                    pausado = not pausado 
                 if evento.key == pygame.K_UP:
                     if linhaAtual > 0:
                         linhaAtual -= 1
@@ -160,6 +175,15 @@ def jogo():
                     if linhaAtual < 4:
                         linhaAtual += 1
 
+        if pausado:
+            textoPause = fonteHUD.render("JOGO PAUSADO", True, branco)
+            textoSpace = fonteHUD.render("Press Space to Continue", True, branco)
+            tela.blit(textoPause, (412,330))
+            tela.blit(textoSpace, (388,370))
+
+            pygame.display.update()
+            relogio.tick(60)
+            continue
 
         posicaoYPascal = linhas[linhaAtual]
         if tempoInvulneravel > 0:
@@ -231,7 +255,23 @@ def jogo():
             velocidadeFundo = 8
         if pontos >= 55:
             velocidadeFundo = 9
+        
+        if crescendoSol:
+            raioSol += 0.6
+            if raioSol >= 50:
+                crescendoSol = False
+        else:
+            raioSol -= 0.6
+            if raioSol <= 20:
+                crescendoSol = True
 
+        contadorBorboleta += 1
+        if contadorBorboleta >= 30:
+            posicaoXBorboleta += random.randint(-20,20)
+            posicaoYBorboleta += random.randint(-15,15)
+            posicaoXBorboleta = max(0, min(posicaoXBorboleta, 950))
+            posicaoYBorboleta = max(0, min(posicaoYBorboleta, 150))
+            contadorBorboleta = 0
         fundoX1 -= velocidadeFundo
         fundoX2 -= velocidadeFundo
         posicaoXLanterna -= velocidadeFundo
@@ -292,6 +332,7 @@ def jogo():
 
         tela.blit(fundo, (fundoX1,0))
         tela.blit(fundo, (fundoX2,0))
+        sol_pulsante(tela, 970,30, int(raioSol))
         tela.blit(lanterna, (posicaoXLanterna, posicaoYLanterna))
         tela.blit(obstaculoAtual1, (posicaoXObstaculo1, posicaoYObstaculo1))
         tela.blit(obstaculoAtual2, (posicaoXObstaculo2, posicaoYObstaculo2))
@@ -302,11 +343,14 @@ def jogo():
         else:
             if tempoInvulneravel % 10 < 5:
                 tela.blit(pascal, (posicaoXPascal, posicaoYPascal))
+        tela.blit(borboleta, (posicaoXBorboleta,posicaoYBorboleta))
         textoPontos = fonteHUD.render(f"Pontos: {pontos}", True, branco)
-        tela.blit(textoPontos, (20,20))
-        tela.blit(coracao, (915,10))
+        tela.blit(textoPontos, (20,660))
+        tela.blit(coracao, (12,10))
         textoVida = fonteHUD.render(f"{vidas}", True, branco)
-        tela.blit(textoVida, (936,18))
+        tela.blit(textoVida, (33,18))
+        textoPause = fonteHUD.render("Press Space to Pause Game", True, branco)
+        tela.blit(textoPause, (745,660))
 
         pygame.display.update()
         relogio.tick(60)
