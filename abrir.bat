@@ -1,2 +1,0 @@
-BeyondTheLanterns.exe
-pause
