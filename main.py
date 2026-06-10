@@ -8,6 +8,7 @@ from recursos.trabalho import sol_pulsante
 limpar_tela()
 inicializar_log()
 pygame.init()
+pygame.mixer.init()
 narrador = pyttsx3.init()
 
 while True:
@@ -46,6 +47,14 @@ pedra2 = pygame.image.load("bases/pedra2.png")
 arbusto = pygame.image.load("bases/arbusto.png")
 tronco = pygame.image.load("bases/tronco.png")
 listaObstaculos = [pedra1,pedra2,arbusto,tronco]
+somLanterna = pygame.mixer.Sound("bases/coletalanterna.mp3")
+somFlor = pygame.mixer.Sound("bases/coletaflor.mp3")
+somColisao = pygame.mixer.Sound("bases/colisao.mp3")
+pygame.mixer.music.load("bases/backgroundmusic.mp3")
+somLanterna.set_volume(0.4)
+somFlor.set_volume(0.5)
+somColisao.set_volume(0.5)
+pygame.mixer.music.set_volume(0.2)
 
 def tela_inicio():
     maiorNome, maiorPontos, dataJogada, horaJogada = maior_pontuador()
@@ -98,6 +107,7 @@ def tela_inicio():
         relogio.tick(60)
 
 def game_over(nome, pontos):
+    pygame.mixer.music.stop()
     salvar_log(nome, pontos)
     maiorNome, maiorPontos, dataJogada, horaJogada = maior_pontuador()
 
@@ -142,6 +152,7 @@ def jogo():
     contadorBorboleta = 0
     pausado = False
     fonteHUD = pygame.font.Font("bases/EBGaramond.ttf", 25)
+    pygame.mixer.music.play(-1)
 
     posicaoXLanterna = 1200
     posicaoYLanterna = random.choice(linhas)
@@ -197,6 +208,7 @@ def jogo():
 
         if retanguloPascal.colliderect(retanguloLanterna):
             pontos += 1
+            pygame.mixer.Sound.play(somLanterna)
             posicaoXLanterna = random.randint(1000,1500)
             posicaoYLanterna = random.choice(linhas)
             while ((posicaoYLanterna == posicaoYObstaculo1 and abs(posicaoXLanterna - posicaoXObstaculo1) < 250) or (posicaoYLanterna == posicaoYObstaculo2 and abs(posicaoXLanterna - posicaoXObstaculo2) < 250) or (posicaoYLanterna == posicaoYObstaculo3 and abs(posicaoXLanterna - posicaoXObstaculo3) < 250) or (posicaoYLanterna == posicaoYFlor and abs(posicaoXLanterna - posicaoXFlor) < 250)):
@@ -204,6 +216,7 @@ def jogo():
                 posicaoYLanterna = random.choice(linhas)
         if retanguloPascal.colliderect(retanguloFlor):
             pontos += 5
+            pygame.mixer.Sound.play(somFlor)
             posicaoXFlor = random.randint(8000,15000)
             posicaoYFlor = random.choice(linhas)
             while ((posicaoYFlor == posicaoYObstaculo1 or posicaoYFlor == posicaoYObstaculo2 or posicaoYFlor == posicaoYObstaculo3) or (posicaoYFlor == posicaoYLanterna and abs(posicaoXFlor - posicaoXLanterna) < 250)):
@@ -211,6 +224,7 @@ def jogo():
                 posicaoYFlor = random.choice(linhas)
         if (retanguloPascal.colliderect(retanguloObstaculo1) and tempoInvulneravel == 0):
             vidas -= 1
+            pygame.mixer.Sound.play(somColisao)
             tempoInvulneravel = 60
             if linhaAtual == 0:
                 linhaAtual += 1
@@ -221,6 +235,7 @@ def jogo():
                 linhaAtual += direcao
         if (retanguloPascal.colliderect(retanguloObstaculo2) and tempoInvulneravel == 0):
             vidas -= 1
+            pygame.mixer.Sound.play(somColisao)
             tempoInvulneravel = 60
             if linhaAtual == 0:
                 linhaAtual += 1
@@ -231,6 +246,7 @@ def jogo():
                 linhaAtual += direcao
         if (retanguloPascal.colliderect(retanguloObstaculo3) and tempoInvulneravel == 0):
             vidas -= 1
+            pygame.mixer.Sound.play(somColisao)
             tempoInvulneravel = 60
             if linhaAtual == 0:
                 linhaAtual += 1
