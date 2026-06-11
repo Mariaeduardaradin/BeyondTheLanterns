@@ -13,3 +13,5 @@ O camaleão Pascal precisa percorrer a floresta do Reino de Corona coletando lan
 -JSON
 -Git
 -GitHub
+-pyttsx3
+-Random
